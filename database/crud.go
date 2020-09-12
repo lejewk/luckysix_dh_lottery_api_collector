@@ -21,13 +21,13 @@ func GetDB() (*CRUD, error) {
 }
 
 // 최근 회차 조회
-func (s *CRUD) GetLatest() *entity.DhLotteryRaw {
-    dhLotteryRaw := entity.DhLotteryRaw{}
-    err := s.db.QueryRow("SELECT * FROM dh_lottery_raw ORDER BY round DESC LIMIT 1").Scan(&dhLotteryRaw)
+func (s *CRUD) GetLatestRound() int {
+    round := 0
+    err := s.db.QueryRow("SELECT round FROM dh_lottery_raw ORDER BY round DESC LIMIT 1").Scan(&round)
     if err != nil {
-        return nil
+        return 0
     }
-    return &dhLotteryRaw
+    return round
 }
 
 func (s *CRUD) FindByRound(round int) *entity.DhLotteryRaw {

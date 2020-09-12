@@ -7,32 +7,42 @@ import (
 )
 
 func main() {
+    fmt.Println("> Start Process")
     db, err := database.GetDB()
 
     if err != nil {
         panic(err)
     }
 
-    latestDbRow := db.GetLatest()
+    currentRound := db.GetLatestRound()
 
-    currentRound := 0
-    if latestDbRow != nil {
-        currentRound = latestDbRow.DrwNo
-    }
+    fmt.Println("> Latest Saved Round:", currentRound)
 
     dhLotteryApi := dh_lottery.GetApi()
     for {
         currentRound = currentRound + 1
+
+        fmt.Println("> Request Next Round:", currentRound)
+
         dhLotteryApiRaw, err := dhLotteryApi.Get(currentRound)
 
         if err != nil {
+            fmt.Println("> Err, Failed Request")
             break
         }
 
         if dhLotteryApiRaw.ReturnValue != "success" {
+            fmt.Println("> Err, Not Exists Next Round")
             break
         }
-        db.Insert(dhLotteryApiRaw)
-        fmt.Println("Round: ", currentRound)
+        saved := db.Insert(dhLotteryApiRaw)
+
+        if saved {
+            fmt.Println("> Success Insert. Round:", currentRound)
+        } else {
+            fmt.Println("> Failed Insert Database. Round:", currentRound)
+        }
     }
+
+    fmt.Println("> Done.")
 }
